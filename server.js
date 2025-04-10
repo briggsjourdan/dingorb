@@ -17,6 +17,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const client = new MongoClient(process.env.MONGO_URI);
 
+console.log('Running Node version:', process.version);
+
 app.get('/api/songs', async (req, res) => {
   try {
     const db = client.db('songs-database');
