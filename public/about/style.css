@@ -1,0 +1,129 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  background: #111;
+  color: #eee;
+}
+
+header {
+  padding: 1rem;
+  background: rgba(15, 15, 50, 0.95);
+  font-size: 28px;
+  font-weight: 300;
+  color: #a5a5a5;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header a {
+  text-decoration: none;
+  color: inherit;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  padding-right: 2rem;
+  margin: 0;
+}
+
+header nav ul li {
+  display: inline;
+}
+
+header nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+header nav ul li a:hover {
+  color: #2ecc71;
+}
+
+.bg-wallpaper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3;
+  background-color: black;
+}
+
+.about-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-section, .chart-overview {
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
+  color: #fff;
+}
+
+.about-section h2, .chart-overview h2 {
+  margin-bottom: 1rem;
+}
+
+.about-section p, .chart-overview p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.about-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.about-links a {
+  font-size: 2rem;
+  color: white;
+  text-decoration: none;
+}
+
+.about-links i {
+  transition: color 0.2s ease;
+}
+
+.about-links a:hover i {
+  color: #f39c12; /* Optional: change the icon color when hovered */
+}
+
+@media (max-width: 800px) {
+  .about-container {
+    flex-direction: column;
+  }
+
+  .about-section, .chart-overview {
+    flex: 1;
+    margin-bottom: 2rem;
+  }
+
+  .links {
+    margin-top: 2rem;
+  }
+}

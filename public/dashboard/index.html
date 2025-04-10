@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="/img/favicon.ico">
+</head>
+<body>
+	<header>
+	  <a href="/"><h1>DINGO'S DASHBOARD</h1></a>
+	  <nav>
+		<ul>
+		  <li><a href="/library">Library</a></li>
+		  <li><a href="/about">About</a></li>
+		</ul>
+	  </nav>
+	</header>
+
+
+  <div class="bg-wallpaper"></div>
+
+  <main>
+    <div id="admin-panel" style="display: none;">
+      <div class="container">
+
+        <!-- Summary Stats Row -->
+        <div id="summary-stats" class="dashboard-summary-row">
+          <div class="stat-box">
+            <h3><i class="fas fa-download"></i> Total Downloads</h3>
+            <p id="total-downloads">–</p>
+          </div>
+          <div class="stat-box">
+            <h3><i class="fas fa-chart-line"></i> Avg. per Song</h3>
+            <p id="avg-downloads">–</p>
+          </div>
+          <div class="stat-box">
+            <h3><i class="fas fa-calendar-day"></i> Last 24 hours</h3>
+            <p id="today-downloads">–</p>
+          </div>
+          <div class="stat-box">
+            <h3><i class="fas fa-calendar-alt"></i> Last 30 days</h3>
+            <p id="month-downloads">–</p>
+          </div>
+        </div>
+
+        <!-- Row with 3 Panels -->
+        <div class="dashboard-row-3">
+          <div class="panel-box">
+            <h3><i class="fas fa-fire"></i> Top Downloads</h3>
+            <ol id="top-downloads" class="data-list"></ol>
+          </div>
+          <div class="panel-box">
+            <h3><i class="fas fa-star"></i> Top Songs by Day</h3>
+            <ol id="top-daily" class="data-list"></ol>
+          </div>
+        </div>
+		
+<form class="song-upload" id="upload-form">
+  <h3 style="grid-column: span 3;"><i class="fas fa-upload"></i> Add a New Song</h3>
+
+  <!-- Left: Drag-and-drop styled rbproj input -->
+  <div style="grid-row: span 1;">
+    <label for="rbproj" style="display: block; margin-bottom: 0.5rem;">rbproj File</label>
+    <div id="drop-zone" style="
+      background: #000;
+      border: 2px dashed #444;
+      border-radius: 8px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.2rem;
+      cursor: pointer;
+    ">
+      Drag & Drop<br>or Click to Select File
+      <input type="file" id="rbproj" name="rbproj" accept=".rbproj" required style="display: none;">
+    </div>
+  </div>
+
+  <!-- Middle Column -->
+  <div>
+    <label for="length">Song Duration</label>
+    <input type="text" id="length" name="length" placeholder="e.g. 3:45" required>
+
+    <label for="rating">Rating</label>
+    <input type="text" id="rating" name="rating" placeholder="Family Friendly/Supervision Recommended/Mature">
+
+    <label for="notes">Author Notes</label>
+    <textarea id="notes" name="notes" rows="3" placeholder="Any release notes or changes..."></textarea>
+  </div>
+
+  <!-- Right Column -->
+  <div>
+    <label for="cover_url">Album Cover URL</label>
+    <input type="url" id="cover_url" name="cover_url" placeholder="https://i.scdn.com/image/..." required>
+
+    <label for="drive_url">Drive Download URL</label>
+    <input type="url" id="drive_url" name="drive_url" placeholder="https://drive.google.com/..." required>
+
+    <label for="preview_url">YouTube Preview URL</label>
+    <input type="url" id="preview_url" name="preview_url" placeholder="https://youtube.com/..." >
+  </div>
+
+  <!-- Submit Button -->
+  <button type="submit">Submit Song</button>
+</form>
+
+
+    </div>
+</div>
+    <!-- Unauthorized Message -->
+    <div id="unauthorized" style="display: none;">
+      <h2>You've reached the back rooms.</h2>
+      <p>Please return back to the <a href="/">library.</a></p>
+    </div>
+  </main>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get("key");
+
+      if (key === "dingoes") {
+        document.getElementById("admin-panel").style.display = "block";
+
+        // Fetch summary stats
+        fetch('/api/stats/summary')
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('total-downloads').textContent = data.totalDownloads;
+            document.getElementById('avg-downloads').textContent = data.avgDownloads;
+            document.getElementById('today-downloads').textContent = data.todaysDownloads;
+            document.getElementById('month-downloads').textContent = data.monthlyDownloads;
+          })
+          .catch(err => console.error('Summary stats error:', err));
+
+        // Fetch top downloads
+        fetch('/api/stats/top-downloads')
+          .then(res => res.json())
+          .then(songs => {
+            const list = document.getElementById('top-downloads');
+            list.innerHTML = songs.map(song => `
+			  <li>
+				<div class="song-entry">
+				  <img src="${song.cover_url}" alt="${song.title} cover">
+				  <div class="song-text">
+					<div class="title">${song.title}</div>
+					<div class="artist">${song.artist}</div>
+				  </div>
+				</div>
+				<div class="download-count"><i class="fas fa-download"></i> ${song.downloads}</div>
+			  </li>
+			`).join('');
+
+          });
+
+        // Fetch top songs by day
+        fetch('/api/stats/top-by-day')
+          .then(res => res.json())
+          .then(data => {
+			  const list = document.getElementById('top-daily');
+			  list.innerHTML = data.map(song => `
+				<li>
+				  <div class="song-entry">
+					<img src="${song.cover_url || 'img/albumcover.png'}" alt="${song.title} cover">
+					<div class="song-text">
+					  <div class="title">${song.title}</div>
+					  <div class="artist">${song.artist}</div>
+					</div>
+				  </div>
+				  <div class="download-count">${new Date(song.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+				</li>
+			  `).join('');
+			});
+      } else {
+        document.getElementById("unauthorized").style.display = "block";
+      }
+
+      // Set random wallpaper
+      const wallpapers = ['../img/wallpaper1.png', '../img/wallpaper2.png', '../img/wallpaper3.png', '../img/wallpaper4.png', '../img/wallpaper5.png', '../img/wallpaper6.png', '../img/wallpaper7.png', '../img/wallpaper8.png', '../img/wallpaper9.png', '../img/wallpaper10.png'];
+      const randomWallpaper = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+      document.querySelector('.bg-wallpaper').style.backgroundImage = `url('${randomWallpaper}')`;
+    });
+
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const rbprojInput = document.getElementById('rbproj');
+  if (!rbprojInput.files.length) return alert("Please select a .rbproj file");
+
+  const formData = new FormData();
+  formData.append('rbproj', rbprojInput.files[0]);
+
+  const extraFields = {
+    length: document.getElementById('length').value,
+    cover_url: document.getElementById('cover_url').value,
+    drive_url: document.getElementById('drive_url').value,
+    preview_url: document.getElementById('preview_url').value,
+    rating: document.getElementById('rating').value,
+    notes: document.getElementById('notes').value
+  };
+
+  for (const [key, value] of Object.entries(extraFields)) {
+    formData.append(key, value);
+  }
+
+  try {
+    const response = await fetch('/api/upload-song', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert('Song uploaded successfully!');
+      e.target.reset();
+    } else {
+      console.error(result);
+      alert('Upload failed: ' + result.error);
+    }
+  } catch (err) {
+    console.error('Error uploading:', err);
+    alert('Something went wrong.');
+  }
+});
+
+  const dropZone = document.getElementById("drop-zone");
+  const fileInput = document.getElementById("rbproj");
+
+  dropZone.addEventListener("click", () => fileInput.click());
+
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.style.background = "#111";
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.style.background = "#000";
+  });
+
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    fileInput.files = e.dataTransfer.files;
+    dropZone.style.background = "#000";
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dingo's Customs Library</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="/img/favicon.ico">
+</head>
+<body>
+	<header>
+	  <a href="/"><h1>DINGO'S CUSTOMS LIBRARY</h1></a>
+	  <nav>
+		<ul>
+		  <li><a href="/library">Library</a></li>
+		  <li><a href="/about">About</a></li>
+		</ul>
+	  </nav>
+	</header>
+
+
+  <div class="bg-wallpaper"></div>
+
+  <main>
+    <div class="container">
+      <div class="toolbar-wrapper">
+        <div class="song-toolbar">
+          <p id="sort-summary">
+            <i class="fas fa-sort"></i> VIEWING ALL ## SONGS, SORTED BY <span id="sort-label">DEFAULT</span>
+          </p>
+        </div>
+        <div id="song-list" class="song-grid"></div>
+      </div>
+
+      <div class="song-preview">
+		  <div class="art-container">
+			<img id="cover" class="artwork" src="img/albumcover.png" alt="Album Art" />
+			<div class="hover-details" id="hover-details"></div>
+		  </div>
+		  <div class="metadata" id="metadata">
+			<div id="info-default">
+				  <div id="info-default" style="display: flex; align-items: center; gap: 12px;">
+				  <h2 style="margin: 0;">Welcome to Dingo's Customs Library</h2>
+				  <img src="img/dingoicon.png" alt="Rock Band Icon" style="width: 72px; height: 72px; border-radius: 50%;">
+				</div>
+				<p>Select a song from the list to see its details including download/chart preview links.</p>
+				<ul>
+				  <li>New tracks added regularly, bookmark for regular updates</li>
+				  <li>All customs in .rb3con format and hosted on Google Drive</li>
+				  <li>Hover over the album cover for additional information</li>
+				</ul>
+				<p style="font-size: 0.8em; opacity: 0.8;">Created by Dingo. Not affiliated with Harmonix or Rock Band.</p>
+			  </div>
+		  </div>
+		</div>
+    </div>
+  </main>
+
+  <script>
+    const songList = document.getElementById('song-list');
+    const metadataBox = document.getElementById('metadata');
+    const coverImg = document.getElementById('cover');
+    const fallbackSrc = 'img/albumcover.png';
+    const sortSummary = document.getElementById('sort-summary');
+    const sortLabel = document.getElementById('sort-label');
+	let selectedSongTitle = null;
+
+	const targetId = new URLSearchParams(window.location.search).get('id');
+	if (targetId) {
+	  setTimeout(() => {
+		const targetCard = document.querySelector(`.song-card[data-id="${targetId}"]`);
+		if (targetCard) {
+		  targetCard.click(); // or call your selection handler directly
+		  targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}
+	  }, 100); // short delay to ensure the DOM is ready
+	}
+
+    const sortModes = [
+      { label: 'NEWEST', sortFn: (a, b) => new Date(b.dateUpdated) - new Date(a.dateUpdated) },
+      // { label: 'Oldest Updated', sortFn: (a, b) => new Date(a.dateUpdated) - new Date(b.dateUpdated) },
+      { label: 'TITLE (A–Z)', sortFn: (a, b) => a.title.localeCompare(b.title) },
+      { label: 'ARTIST (A–Z)', sortFn: (a, b) => a.artist.localeCompare(b.artist) },
+      { label: 'DIFFICULTY', sortFn: (a, b) => getBandSum(a) - getBandSum(b) },
+      // { label: 'Difficulty (Hardest)', sortFn: (a, b) => getBandSum(b) - getBandSum(a) },
+      { label: 'LENGTH', sortFn: (a, b) => getSongSeconds(a.length) - getSongSeconds(b.length) },
+      // { label: 'Length (Longest)', sortFn: (a, b) => getSongSeconds(b.length) - getSongSeconds(a.length) },
+      { label: 'POPULARITY', sortFn: (a, b) => b.downloads - a.downloads },
+      // { label: 'Least Popular', sortFn: (a, b) => a.downloads - b.downloads }
+    ];
+
+    let currentSortIndex = 0;
+    let allSongs = [];
+
+    const getBandSum = song => {
+      const keys = [
+        'rank_guitar', 'rank_bass', 'rank_drum', 'rank_vocals', 'rank_keys',
+        'rank_pro_guitar', 'rank_pro_bass', 'rank_pro_drums', 'rank_pro_keys'
+      ];
+      return keys.reduce((sum, key) => sum + (song[key] || 0), 0);
+    };
+
+    const getSongSeconds = len => {
+      if (!len) return 0;
+      const [m, s] = len.split(':').map(n => parseInt(n, 10));
+      return (m * 60) + s;
+    };
+
+    const difficultyDots = (level) => {
+      if (level == null) return '<span class="no-part">NO PART</span>';
+      if (level === 0) return '<span class="no-part">NO PART</span>';
+      if (level === 7) {
+        return '<span class="tier-icons">' +
+          '<img src="img/tier_devil_32.png" class="tier-icon">'.repeat(5) +
+          '</span>';
+      }
+      const capped = Math.max(1, Math.min(level, 6));
+      const filled = Math.max(0, capped - 1);
+      const empty = 5 - filled;
+      return '<span class="tier-icons">' +
+        '<img src="img/tier_dot_32.png" class="tier-icon">'.repeat(filled) +
+        '<img src="img/tier_circle_32.png" class="tier-icon">'.repeat(empty) +
+        '</span>';
+    };
+
+    function renderSongPreview(song, card) {
+      document.querySelectorAll('.song-card.selected').forEach(el => el.classList.remove('selected'));
+      if (card) card.classList.add('selected');
+	  
+      coverImg.src = song.cover_url && song.cover_url.trim() !== '' ? song.cover_url : fallbackSrc;
+      coverImg.alt = song.cover_url ? `${song.title} album cover` : 'No album cover available';
+
+      const difficultyBlock = `
+        <div class="difficulty-grid">
+          <div class="difficulty-col">
+            <p><img src="img/instruments/guitar.png" class="instr-icon"> ${difficultyDots(song.rank_guitar)}</p>
+            <p><img src="img/instruments/bass.png" class="instr-icon"> ${difficultyDots(song.rank_bass)}</p>
+            <p><img src="img/instruments/drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
+            <p><img src="img/instruments/keys.png" class="instr-icon"> ${difficultyDots(song.rank_keys)}</p>
+            <p><img src="img/instruments/vocals.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}</p>
+          </div>
+          <div class="difficulty-col">
+            <p><img src="img/instruments/pro_guitar.png" class="instr-icon"> ${difficultyDots(song.rank_pro_guitar)}</p>
+            <p><img src="img/instruments/pro_bass.png" class="instr-icon"> ${difficultyDots(song.rank_pro_bass)}</p>
+            <p><img src="img/instruments/pro_drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
+            <p><img src="img/instruments/pro_keys.png" class="instr-icon"> ${difficultyDots(song.rank_pro_keys)}</p>
+			<p>
+			  ${
+				song.vocal_parts >= 2
+				  ? `<img src="img/instruments/${song.vocal_parts === 2 ? '2harmonies' : '3harmonies'}.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}`
+				  : `<img src="img/instruments/3harmonies.png" class="instr-icon"> <span class="no-part">NO PART</span>`
+			  }
+			</p>
+          </div>
+        </div>
+      `;
+
+		const previewLink = song.preview_url && song.preview_url.trim() !== ''
+		  ? `
+			<p>
+			  <a href="${song.preview_url}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; color: #c4302b; text-decoration: none;">
+				<i class="fab fa-youtube" style="font-size: 1.2em;"></i> <b>Preview on YouTube</b>
+			  </a>
+			</p>
+		  `
+		  : '';
+
+		const hoverNotes = song.notes && song.notes.trim() !== ''
+		  ? `
+			<hr style="border: 1px solid #444; margin: 0.5rem 0;">
+			<p><strong>Author Notes:</strong> ${song.notes}</p>
+		  `
+		  : '';
+
+		document.getElementById('hover-details').innerHTML = `
+		  <div class="hover-text">
+			<p><h2><u>Additional Information</u></h2></p>
+			<p><strong>Album:</strong> ${song.album}</p>
+			<p><strong>Genre:</strong> ${song.genre}</p>
+			<p><strong>Rating:</strong> ${song.rating}</p>
+			${previewLink}
+			${hoverNotes}
+		  </div>
+		`;
+
+		metadataBox.innerHTML = `
+		  <div class="song-summary" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+			<span><i class="fas fa-clock"></i> ${song.length || 'Unknown'}</span>
+			<span id="dl-count"><i class="fas fa-download"></i> ${song.downloads + 1}</span>
+			<a href="${song.drive_url}" target="_blank" rel="noopener" class="download-button" id="dl-button">
+			  <i class="fas fa-download"></i> Download
+			</a>
+		  </div>
+		  ${difficultyBlock}
+		  <p><strong>Last Updated:</strong> ${new Date(song.dateUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+		`;
+
+		const downloadBtn = document.getElementById('dl-button');
+		const dlCounter = document.getElementById('dl-count');
+
+		downloadBtn.addEventListener('click', (e) => {
+		  e.preventDefault(); // prevent default <a> behavior
+
+		  // Grey it out and show spinner
+		  downloadBtn.style.pointerEvents = 'none';
+		  downloadBtn.style.opacity = '0.6';
+		  downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
+
+		  // Trigger the file download manually
+		  const tempLink = document.createElement('a');
+			tempLink.href = song.drive_url;
+			tempLink.setAttribute('download', ''); // Suggest download, not open
+			document.body.appendChild(tempLink);
+			tempLink.click();
+			document.body.removeChild(tempLink);
+
+		  // Update counter in DB
+		  fetch('/api/increment-downloads', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id: song._id })
+		  }).then(() => {
+			const current = parseInt(dlCounter.textContent.replace(/\D/g, ''), 10);
+			dlCounter.innerHTML = `<i class="fas fa-download"></i> ${current + 1}`;
+		  }).catch(err => {
+			console.error('Failed to update download count', err);
+		  });
+
+		  // Wait 8s, then show "Downloaded!"
+		  setTimeout(() => {
+			downloadBtn.innerHTML = `<i class="fas fa-check-circle"></i> Downloaded!`;
+			downloadBtn.style.color = '#999';
+		  }, 8000);
+		});
+
+    }
+
+	function renderSongs() {
+	  const sortedSongs = [...allSongs].sort(sortModes[currentSortIndex].sortFn);
+	  songList.innerHTML = '';
+	  sortLabel.textContent = sortModes[currentSortIndex].label;
+	  sortSummary.innerHTML = `<i class="fas fa-sort"></i> VIEWING ALL ${sortedSongs.length} SONGS, SORTED BY <span id="sort-label">${sortModes[currentSortIndex].label}</span>`;
+
+	  const targetId = new URLSearchParams(window.location.search).get('id');
+	  let targetCard = null;
+
+	  sortedSongs.forEach(song => {
+		const card = document.createElement('div');
+		card.className = 'song-card';
+		card.dataset.id = song._id;
+
+		card.innerHTML = `
+		  <div class="song-header">
+			<span class="title">${song.title}</span>
+			<span class="artist">${song.artist}</span>
+			<span class="year">${song.year}</span>
+		  </div>
+		`;
+
+		card.addEventListener('click', () => {
+		  selectedSongTitle = song.title;
+		  renderSongPreview(song, card);
+
+		  // 🔹 Update the URL when selected
+		  const url = new URL(window.location);
+		  url.searchParams.set('id', song._id);
+		  window.history.replaceState({}, '', url);
+		});
+
+		songList.appendChild(card);
+
+		// Track the card that matches the URL ID
+		if (targetId === song._id) {
+		  targetCard = card;
+		}
+
+		// Re-select the card if it's still selected after sort
+		if (selectedSongTitle === song.title) {
+		  card.classList.add('selected');
+		  setTimeout(() => {
+			card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		  }, 50);
+		}
+	  });
+
+	  // 🔹 If there's a match in URL, simulate click
+	  if (targetCard) {
+		setTimeout(() => {
+		  targetCard.click();
+		  targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		}, 100);
+	  }
+	}
+
+	function handleLongTitles() {
+	  document.querySelectorAll('.song-header').forEach(header => {
+		const titleEl = header.querySelector('.title');
+		const artistEl = header.querySelector('.artist');
+
+		// Only hide artist if the title is actually being truncated
+		if (titleEl.scrollWidth > titleEl.clientWidth) {
+		  artistEl.style.display = 'none';
+		} else {
+		  artistEl.style.display = '';
+		}
+	  });
+	}
+
+    // Sort toggle click handler
+    document.querySelector('.song-toolbar').addEventListener('click', () => {
+      currentSortIndex = (currentSortIndex + 1) % sortModes.length;
+      renderSongs();
+    });
+
+    // Wallpaper randomizer
+    const wallpapers = ['img/wallpaper1.png', 'img/wallpaper2.png', 'img/wallpaper3.png', 'img/wallpaper4.png', 'img/wallpaper5.png', 'img/wallpaper6.png', 'img/wallpaper7.png', 'img/wallpaper8.png', 'img/wallpaper9.png', 'img/wallpaper10.png'];
+    const randomWallpaper = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+    document.querySelector('.bg-wallpaper').style.backgroundImage = `url('${randomWallpaper}')`;
+
+    // Load songs
+    fetch('/api/songs')
+      .then(res => res.json())
+      .then(data => {
+    console.log('Fetched songs:', data); // look for _id here
+        allSongs = data;
+        renderSongs();
+      });
+  </script>
+</body>
+</html>

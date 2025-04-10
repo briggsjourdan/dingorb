@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Dingo's Customs</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="/img/favicon.ico">
+</head>
+<body>
+	<header>
+	  <a href="/"><h1>ABOUT DINGO'S CUSTOMS</h1></a>
+	  <nav>
+		<ul>
+		  <li><a href="/library">Library</a></li>
+		  <li><a href="/about">About</a></li>
+		</ul>
+	  </nav>
+	</header>
+
+
+  <div class="bg-wallpaper"></div>
+
+  <main>
+    <div class="about-container">
+      <!-- About Me Section -->
+      <section class="about-section">
+        <h2>About Me</h2>
+        <p>Hey, I'm Dingo! I enjoy many types and genres of music and find joy in being able to sing and play them in Rock Band.</p>
+        <p>I started authoring in late 2022 and released about 100 songs before taking a break from May 2024. I've returned after a bit of self-development, with an all-new and self-managed resource of custom songs that you can access right here.</p>
+		<p>You can reach out to me through YouTube or Discord below.</p>
+      </section>
+
+      <!-- Chart Overview Section -->
+      <section class="chart-overview">
+        <h2>Chart Overview</h2>
+        <p>All charts have all instruments where applicable (including Pro Keys), and manual work on the venues. All songs have multitrack audio, whether official or DIY. Downloads are available in the rb3con (Xbox) format and are hosted on Google Drive.</p>
+        <p>Note that all my previous customs are still being double-checked and updated and will all appear in the library over time. Any custom links from Rhythmverse will link to the song's details.</p>
+      </section>
+    </div>
+    <div class="about-container">
+      <!-- About Me Section -->
+      <section class="about-section">
+        <h2>The Library</h2>
+        <p>I like to cover a wide variety of songs for music tastes. One ongoing project is to release songs from all across the world in a few different languages. The most common genres for my songs include Pop-Rock, Inspirational (i.e. Christian or Praise & Worship), and Alternative Rock.</p>
+        <p>Across my releases, there's references to certain 'seasons'. These are just groupings of first rounds of releases over a period of time. While I usually release in packs of 3 on a scheduled basis, I'm adding more flexibility to that.</p>
+      </section>
+
+      <!-- Chart Overview Section -->
+      <section class="chart-overview">
+        <h2>Requests</h2>
+        <p>Occasionally I'll send out a call so I can hear what people are interested in. If you're a long-time supporter and enjoy playing my customs, I'd be keen to know what you'd like to play. If we both like how the song sounds, I'll add it to the list.</p>
+        <p>If there's any feedback regarding any of my charts, or would like to add any further input let me know! Continuous improvement and learning is good, and all things are better in collaboration.</p>
+      </section>
+    </div>
+	<!-- Links Section -->
+	<div class="about-links">
+	  <a href="https://www.youtube.com/@haramdingo" target="_blank">
+		<i class="fab fa-youtube"></i>
+	  </a>
+	  <a href="http://discordapp.com/users/1171226259251011676" target="_blank">
+		<i class="fab fa-discord"></i>
+	  </a>
+	</div>
+  </main>
+  
+  <script>
+      // Set random wallpaper
+      const wallpapers = ['../img/wallpaper1.png', '../img/wallpaper2.png', '../img/wallpaper3.png', '../img/wallpaper4.png', '../img/wallpaper5.png', '../img/wallpaper6.png', '../img/wallpaper7.png', '../img/wallpaper8.png', '../img/wallpaper9.png', '../img/wallpaper10.png'];
+      const randomWallpaper = wallpapers[Math.floor(Math.random() * wallpapers.length)];
+      document.querySelector('.bg-wallpaper').style.backgroundImage = `url('${randomWallpaper}')`;
+</script>
+</body>
+</html>
