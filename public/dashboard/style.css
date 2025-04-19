@@ -220,6 +220,7 @@ form.song-upload {
 .song-upload input[type="text"],
 .song-upload input[type="url"],
 .song-upload input[type="file"],
+.song-upload input[type="number"],
 .song-upload textarea {
   padding: 0.5rem;
   margin: 8px 0px;
