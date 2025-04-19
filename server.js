@@ -229,6 +229,11 @@ async function startServer() {
       try {
         const rbprojText = fs.readFileSync(req.file.path, 'utf-8');
         const metadata = parseRbproj(rbprojText);
+		const downloadCount = parseInt(req.body.downloads, 10);
+			if (isNaN(downloadCount) || downloadCount < 0) {
+			  return res.status(400).json({ error: 'Invalid download count' });
+			}
+
 
         const song = {
           ...metadata,
@@ -238,7 +243,7 @@ async function startServer() {
           preview_url: req.body.preview_url,
           notes: req.body.notes,
           rating: req.body.rating,
-          downloads: 0,
+          downloads: parseInt(req.body.downloads, 10),
           dateUpdated: new Date()
         };
 
