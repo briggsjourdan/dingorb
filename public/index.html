@@ -209,42 +209,43 @@ const downloadButtons = song.drive_urls?.length
 
   const dlCounter = document.getElementById('dl-count');
 
-  document.querySelectorAll('.download-button:not(.disabled)').forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      const url = button.href;
-      button.style.pointerEvents = 'none';
-      button.style.opacity = '0.6';
-      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
-
-      const tempLink = document.createElement('a');
-      tempLink.href = url;
-      tempLink.setAttribute('download', '');
-      document.body.appendChild(tempLink);
-      tempLink.click();
-      document.body.removeChild(tempLink);
-
-      fetch('/api/increment-downloads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: song._id })
-      }).then(() => {
-        const current = parseInt(dlCounter.textContent.replace(/\D/g, ''), 10);
-        dlCounter.innerHTML = `<i class="fas fa-download"></i> ${current + 1}`;
-      }).catch(err => {
-        console.error('Failed to update download count', err);
-      });
-
-	setTimeout(() => {
-	  const label = button.textContent.trim();
-	  const isStandard = label.toLowerCase() === 'download';
-	  const suffix = isStandard ? 'Downloaded!' : `${label} Downloaded!`;
-	  button.innerHTML = `<i class="fas fa-check-circle"></i> ${suffix}`;
-	  button.style.color = '#999';
-	}, 8000);
-    });
-  });
+	document.querySelectorAll('.download-button:not(.disabled)').forEach(button => {
+	  button.addEventListener('click', (e) => {
+	    e.preventDefault();
+	
+	    const url = button.href;
+	    const originalLabel = button.textContent.trim(); // store BEFORE replacing
+	
+	    button.style.pointerEvents = 'none';
+	    button.style.opacity = '0.6';
+	    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
+	
+	    const tempLink = document.createElement('a');
+	    tempLink.href = url;
+	    tempLink.setAttribute('download', '');
+	    document.body.appendChild(tempLink);
+	    tempLink.click();
+	    document.body.removeChild(tempLink);
+	
+	    fetch('/api/increment-downloads', {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/json' },
+	      body: JSON.stringify({ id: song._id })
+	    }).then(() => {
+	      const current = parseInt(dlCounter.textContent.replace(/\D/g, ''), 10);
+	      dlCounter.innerHTML = `<i class="fas fa-download"></i> ${current + 1}`;
+	    }).catch(err => {
+	      console.error('Failed to update download count', err);
+	    });
+	
+	    setTimeout(() => {
+	      const isStandard = originalLabel.toLowerCase() === 'download';
+	      const suffix = isStandard ? 'Downloaded!' : `${originalLabel} Downloaded!`;
+	      button.innerHTML = `<i class="fas fa-check-circle"></i> ${suffix}`;
+	      button.style.color = '#999';
+	    }, 8000);
+	  });
+	});
 }
 	function renderSongs() {
 	  const sortedSongs = [...allSongs].sort(sortModes[currentSortIndex].sortFn);
