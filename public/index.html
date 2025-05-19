@@ -236,10 +236,13 @@ const downloadButtons = song.drive_urls?.length
         console.error('Failed to update download count', err);
       });
 
-      setTimeout(() => {
-        button.innerHTML = `<i class="fas fa-check-circle"></i> Downloaded!`;
-        button.style.color = '#999';
-      }, 8000);
+	setTimeout(() => {
+	  const label = button.textContent.trim();
+	  const isStandard = label.toLowerCase() === 'download';
+	  const suffix = isStandard ? 'Downloaded!' : `${label} Downloaded!`;
+	  button.innerHTML = `<i class="fas fa-check-circle"></i> ${suffix}`;
+	  button.style.color = '#999';
+	}, 8000);
     });
   });
 }
