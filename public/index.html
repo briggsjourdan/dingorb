@@ -177,8 +177,8 @@ function renderSongPreview(song, card) {
 const downloadButtons = song.drive_urls?.length
   ? song.drive_urls.map((url, index) => {
       const label = song.drive_urls.length === 1
-        ? 'Download'
-        : (index === 0 ? '1x' : '2x');
+        ? '<b>Download</b>'
+        : (index === 0 ? '<b>1x</b>' : '<b>2x</b>');
       return `
         <a href="${url}" target="_blank" rel="noopener" class="download-button" data-url-index="${index}">
           <i class="fas fa-download"></i> ${label}
