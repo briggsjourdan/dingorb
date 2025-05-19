@@ -239,7 +239,11 @@ async function startServer() {
           ...metadata,
           length: req.body.length,
           cover_url: req.body.cover_url,
-          drive_url: req.body.drive_url,
+          drive_urls: Array.isArray(req.body.drive_urls)
+	  ? req.body.drive_urls
+	  : req.body.drive_urls
+	    ? [req.body.drive_urls]
+	    : [],
           preview_url: req.body.preview_url,
           notes: req.body.notes,
           rating: req.body.rating,
