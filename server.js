@@ -3,6 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -276,3 +277,8 @@ async function startServer() {
 }
 
 startServer();
+setInterval(() => {
+  fetch('https://dingorb.com/')
+    .then(res => console.log(`Keep-alive ping: ${res.status}`))
+    .catch(err => console.error('Keep-alive ping failed:', err));
+}, 1000 * 60 * 14); // every 14 minutes
