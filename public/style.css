@@ -359,6 +359,29 @@ header nav ul li a:hover {
   background-color: #444444;
 }
 
+.song-summary .download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  margin-top: 6px;
+  text-decoration: none;
+  background-color: #222;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.song-summary .download-button:hover {
+  background-color: #444;
+}
+
+.song-summary .download-button.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
 .art-container {
   position: relative;
   display: inline-block;
