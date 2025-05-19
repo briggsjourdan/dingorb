@@ -106,8 +106,8 @@
     <label for="cover_url">Album Cover URL</label>
     <input type="url" id="cover_url" name="cover_url" placeholder="https://i.scdn.com/image/..." required>
 
-    <label for="drive_url">Drive Download URL</label>
-    <input type="url" id="drive_url" name="drive_url" placeholder="https://drive.google.com/..." required>
+    <label for="drive_url">Drive Download URL(s)</label>
+    <input type="text" name="drive_urls" placeholder="https://link1, https://link2" />
 
     <label for="preview_url">YouTube Preview URL</label>
     <input type="url" id="preview_url" name="preview_url" placeholder="https://youtube.com/..." >
@@ -209,7 +209,9 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
   const extraFields = {
     length: document.getElementById('length').value,
     cover_url: document.getElementById('cover_url').value,
-    drive_url: document.getElementById('drive_url').value,
+    drive_urls: req.body.drive_urls
+  ? req.body.drive_urls.split(',').map(url => url.trim()).filter(Boolean)
+  : [],
     preview_url: document.getElementById('preview_url').value,
     rating: document.getElementById('rating').value,
     notes: document.getElementById('notes').value,
