@@ -206,22 +206,24 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
   const formData = new FormData();
   formData.append('rbproj', rbprojInput.files[0]);
 
-const rawDriveUrls = document.querySelector('input[name="drive_urls"]').value;
-const extraFields = {
-  length: document.getElementById('length').value,
-  cover_url: document.getElementById('cover_url').value,
-  drive_urls: rawDriveUrls
+  // Get and split drive URLs
+  const rawDriveUrls = document.querySelector('input[name="drive_urls"]').value;
+  const driveUrls = rawDriveUrls
     ? rawDriveUrls.split(',').map(url => url.trim()).filter(Boolean)
-    : [],
-  preview_url: document.getElementById('preview_url').value,
-  rating: document.getElementById('rating').value,
-  notes: document.getElementById('notes').value,
-  downloads: document.getElementById('downloads').value
-};
+    : [];
 
-  for (const [key, value] of Object.entries(extraFields)) {
-    formData.append(key, value);
-  }
+  // Append each drive_url as an individual FormData entry
+  driveUrls.forEach(url => {
+    formData.append('drive_urls', url);
+  });
+
+  // Append the rest of the fields
+  formData.append('length', document.getElementById('length').value);
+  formData.append('cover_url', document.getElementById('cover_url').value);
+  formData.append('preview_url', document.getElementById('preview_url').value);
+  formData.append('rating', document.getElementById('rating').value);
+  formData.append('notes', document.getElementById('notes').value);
+  formData.append('downloads', document.getElementById('downloads').value);
 
   try {
     const response = await fetch('/api/upload-song', {
