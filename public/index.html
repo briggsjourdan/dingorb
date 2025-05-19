@@ -175,12 +175,14 @@ function renderSongPreview(song, card) {
     : '';
 
   const downloadButtons = song.drive_urls?.length
-    ? song.drive_urls.map((url, index) => `
+  ? song.drive_urls.map((url, index) => {
+      const label = url.includes('2x') ? '2x' : '1x';
+      return `
         <a href="${url}" target="_blank" rel="noopener" class="download-button" data-url-index="${index}">
-          <i class="fas fa-download"></i> Download${song.drive_urls.length > 1 ? ` (${index + 1})` : ''}
-        </a>
-      `).join('')
-    : '<a href="#" class="download-button disabled"><i class="fas fa-times-circle"></i> No Download</a>';
+          <i class="fas fa-download"></i> ${label}
+        </a>`;
+    }).join('')
+  : '<a href="#" class="download-button disabled"><i class="fas fa-times-circle"></i> No Download</a>';
 
   document.getElementById('hover-details').innerHTML = `
     <div class="hover-text">
