@@ -125,118 +125,120 @@
         '</span>';
     };
 
-    function renderSongPreview(song, card) {
-      document.querySelectorAll('.song-card.selected').forEach(el => el.classList.remove('selected'));
-      if (card) card.classList.add('selected');
-	  
-      coverImg.src = song.cover_url && song.cover_url.trim() !== '' ? song.cover_url : fallbackSrc;
-      coverImg.alt = song.cover_url ? `${song.title} album cover` : 'No album cover available';
+function renderSongPreview(song, card) {
+  document.querySelectorAll('.song-card.selected').forEach(el => el.classList.remove('selected'));
+  if (card) card.classList.add('selected');
 
-      const difficultyBlock = `
-        <div class="difficulty-grid">
-          <div class="difficulty-col">
-            <p><img src="img/instruments/guitar.png" class="instr-icon"> ${difficultyDots(song.rank_guitar)}</p>
-            <p><img src="img/instruments/bass.png" class="instr-icon"> ${difficultyDots(song.rank_bass)}</p>
-            <p><img src="img/instruments/drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
-            <p><img src="img/instruments/keys.png" class="instr-icon"> ${difficultyDots(song.rank_keys)}</p>
-            <p><img src="img/instruments/vocals.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}</p>
-          </div>
-          <div class="difficulty-col">
-            <p><img src="img/instruments/pro_guitar.png" class="instr-icon"> ${difficultyDots(song.rank_pro_guitar)}</p>
-            <p><img src="img/instruments/pro_bass.png" class="instr-icon"> ${difficultyDots(song.rank_pro_bass)}</p>
-            <p><img src="img/instruments/pro_drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
-            <p><img src="img/instruments/pro_keys.png" class="instr-icon"> ${difficultyDots(song.rank_pro_keys)}</p>
-			<p>
-			  ${
-				song.vocal_parts >= 2
-				  ? `<img src="img/instruments/${song.vocal_parts === 2 ? '2harmonies' : '3harmonies'}.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}`
-				  : `<img src="img/instruments/3harmonies.png" class="instr-icon"> <span class="no-part">NO PART</span>`
-			  }
-			</p>
-          </div>
-        </div>
-      `;
+  coverImg.src = song.cover_url && song.cover_url.trim() !== '' ? song.cover_url : fallbackSrc;
+  coverImg.alt = song.cover_url ? `${song.title} album cover` : 'No album cover available';
 
-		const previewLink = song.preview_url && song.preview_url.trim() !== ''
-		  ? `
-			<p>
-			  <a href="${song.preview_url}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; color: #c4302b; text-decoration: none;">
-				<i class="fab fa-youtube" style="font-size: 1.2em;"></i> <b>Preview on YouTube</b>
-			  </a>
-			</p>
-		  `
-		  : '';
+  const difficultyBlock = `
+    <div class="difficulty-grid">
+      <div class="difficulty-col">
+        <p><img src="img/instruments/guitar.png" class="instr-icon"> ${difficultyDots(song.rank_guitar)}</p>
+        <p><img src="img/instruments/bass.png" class="instr-icon"> ${difficultyDots(song.rank_bass)}</p>
+        <p><img src="img/instruments/drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
+        <p><img src="img/instruments/keys.png" class="instr-icon"> ${difficultyDots(song.rank_keys)}</p>
+        <p><img src="img/instruments/vocals.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}</p>
+      </div>
+      <div class="difficulty-col">
+        <p><img src="img/instruments/pro_guitar.png" class="instr-icon"> ${difficultyDots(song.rank_pro_guitar)}</p>
+        <p><img src="img/instruments/pro_bass.png" class="instr-icon"> ${difficultyDots(song.rank_pro_bass)}</p>
+        <p><img src="img/instruments/pro_drums.png" class="instr-icon"> ${difficultyDots(song.rank_drum)}</p>
+        <p><img src="img/instruments/pro_keys.png" class="instr-icon"> ${difficultyDots(song.rank_pro_keys)}</p>
+        <p>
+          ${
+            song.vocal_parts >= 2
+              ? `<img src="img/instruments/${song.vocal_parts === 2 ? '2harmonies' : '3harmonies'}.png" class="instr-icon"> ${difficultyDots(song.rank_vocals)}`
+              : `<img src="img/instruments/3harmonies.png" class="instr-icon"> <span class="no-part">NO PART</span>`
+          }
+        </p>
+      </div>
+    </div>
+  `;
 
-		const hoverNotes = song.notes && song.notes.trim() !== ''
-		  ? `
-			<hr style="border: 1px solid #444; margin: 0.5rem 0;">
-			<p><strong>Author Notes:</strong> ${song.notes}</p>
-		  `
-		  : '';
+  const previewLink = song.preview_url && song.preview_url.trim() !== ''
+    ? `
+      <p>
+        <a href="${song.preview_url}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; color: #c4302b; text-decoration: none;">
+          <i class="fab fa-youtube" style="font-size: 1.2em;"></i> <b>Preview on YouTube</b>
+        </a>
+      </p>
+    `
+    : '';
 
-		document.getElementById('hover-details').innerHTML = `
-		  <div class="hover-text">
-			<p><h2><u>Additional Information</u></h2></p>
-			<p><strong>Album:</strong> ${song.album}</p>
-			<p><strong>Genre:</strong> ${song.genre}</p>
-			<p><strong>Rating:</strong> ${song.rating}</p>
-			${previewLink}
-			${hoverNotes}
-		  </div>
-		`;
+  const hoverNotes = song.notes && song.notes.trim() !== ''
+    ? `
+      <hr style="border: 1px solid #444; margin: 0.5rem 0;">
+      <p><strong>Author Notes:</strong> ${song.notes}</p>
+    `
+    : '';
 
-		metadataBox.innerHTML = `
-		  <div class="song-summary" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
-			<span><i class="fas fa-clock"></i> ${song.length || 'Unknown'}</span>
-			<span id="dl-count"><i class="fas fa-download"></i> ${song.downloads + 1}</span>
-			<a href="${song.drive_url}" target="_blank" rel="noopener" class="download-button" id="dl-button">
-			  <i class="fas fa-download"></i> Download
-			</a>
-		  </div>
-		  ${difficultyBlock}
-		  <p><strong>Last Updated:</strong> ${new Date(song.dateUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-		`;
+  const downloadButtons = song.drive_urls?.length
+    ? song.drive_urls.map((url, index) => `
+        <a href="${url}" target="_blank" rel="noopener" class="download-button" data-url-index="${index}">
+          <i class="fas fa-download"></i> Download${song.drive_urls.length > 1 ? ` (${index + 1})` : ''}
+        </a>
+      `).join('')
+    : '<a href="#" class="download-button disabled"><i class="fas fa-times-circle"></i> No Download</a>';
 
-		const downloadBtn = document.getElementById('dl-button');
-		const dlCounter = document.getElementById('dl-count');
+  document.getElementById('hover-details').innerHTML = `
+    <div class="hover-text">
+      <p><h2><u>Additional Information</u></h2></p>
+      <p><strong>Album:</strong> ${song.album}</p>
+      <p><strong>Genre:</strong> ${song.genre}</p>
+      <p><strong>Rating:</strong> ${song.rating}</p>
+      ${previewLink}
+      ${hoverNotes}
+    </div>
+  `;
 
-		downloadBtn.addEventListener('click', (e) => {
-		  e.preventDefault(); // prevent default <a> behavior
+  metadataBox.innerHTML = `
+    <div class="song-summary" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+      <span><i class="fas fa-clock"></i> ${song.length || 'Unknown'}</span>
+      <span id="dl-count"><i class="fas fa-download"></i> ${song.downloads + 1}</span>
+      ${downloadButtons}
+    </div>
+    ${difficultyBlock}
+    <p><strong>Last Updated:</strong> ${new Date(song.dateUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+  `;
 
-		  // Grey it out and show spinner
-		  downloadBtn.style.pointerEvents = 'none';
-		  downloadBtn.style.opacity = '0.6';
-		  downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
+  const dlCounter = document.getElementById('dl-count');
 
-		  // Trigger the file download manually
-		  const tempLink = document.createElement('a');
-			tempLink.href = song.drive_url;
-			tempLink.setAttribute('download', ''); // Suggest download, not open
-			document.body.appendChild(tempLink);
-			tempLink.click();
-			document.body.removeChild(tempLink);
+  document.querySelectorAll('.download-button:not(.disabled)').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
 
-		  // Update counter in DB
-		  fetch('/api/increment-downloads', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ id: song._id })
-		  }).then(() => {
-			const current = parseInt(dlCounter.textContent.replace(/\D/g, ''), 10);
-			dlCounter.innerHTML = `<i class="fas fa-download"></i> ${current + 1}`;
-		  }).catch(err => {
-			console.error('Failed to update download count', err);
-		  });
+      const url = button.href;
+      button.style.pointerEvents = 'none';
+      button.style.opacity = '0.6';
+      button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
 
-		  // Wait 8s, then show "Downloaded!"
-		  setTimeout(() => {
-			downloadBtn.innerHTML = `<i class="fas fa-check-circle"></i> Downloaded!`;
-			downloadBtn.style.color = '#999';
-		  }, 8000);
-		});
+      const tempLink = document.createElement('a');
+      tempLink.href = url;
+      tempLink.setAttribute('download', '');
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
 
-    }
+      fetch('/api/increment-downloads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: song._id })
+      }).then(() => {
+        const current = parseInt(dlCounter.textContent.replace(/\D/g, ''), 10);
+        dlCounter.innerHTML = `<i class="fas fa-download"></i> ${current + 1}`;
+      }).catch(err => {
+        console.error('Failed to update download count', err);
+      });
 
+      setTimeout(() => {
+        button.innerHTML = `<i class="fas fa-check-circle"></i> Downloaded!`;
+        button.style.color = '#999';
+      }, 8000);
+    });
+  });
+}
 	function renderSongs() {
 	  const sortedSongs = [...allSongs].sort(sortModes[currentSortIndex].sortFn);
 	  songList.innerHTML = '';
