@@ -3,7 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// ❌ removed node-fetch import
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -15,6 +15,10 @@ const upload = multer({ dest: 'uploads/' });
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Ultra-fast health endpoint (no DB)
+app.get('/health', (_req, res) => res.sendStatus(204));
+app.head('/health', (_req, res) => res.sendStatus(204));
 
 console.log('Running Node version:', process.version);
 
@@ -97,7 +101,7 @@ const getString = (key) => {
     rank_drum: drumsEnabled ? getNumber('rank_drum') : 0,
     rank_vocals: vocalsEnabled ? getNumber('rank_vocals') : 0,
     rank_keys: keysEnabled ? getNumber('rank_keys') : 0,
-    rank_pro_keys: keysEnabled ? getNumber('rank_pro_keys') : 0,
+  	rank_pro_keys: keysEnabled ? getNumber('rank_pro_keys') : 0,
     vocal_parts: vocalsEnabled ? getNumber('vocal_parts') : 0
   };
 };
@@ -244,25 +248,24 @@ async function startServer() {
       try {
         const rbprojText = fs.readFileSync(req.file.path, 'utf-8');
         const metadata = parseRbproj(rbprojText);
-		const downloadCount = parseInt(req.body.downloads, 10);
-			if (isNaN(downloadCount) || downloadCount < 0) {
-			  return res.status(400).json({ error: 'Invalid download count' });
-			}
-
+        const downloadCount = parseInt(req.body.downloads, 10);
+        if (isNaN(downloadCount) || downloadCount < 0) {
+          return res.status(400).json({ error: 'Invalid download count' });
+        }
 
         const song = {
           ...metadata,
           length: req.body.length,
           cover_url: req.body.cover_url,
           drive_urls: Array.isArray(req.body.drive_urls)
-	  ? req.body.drive_urls
-	  : req.body.drive_urls
-	    ? [req.body.drive_urls]
-	    : [],
+            ? req.body.drive_urls
+            : req.body.drive_urls
+              ? [req.body.drive_urls]
+              : [],
           preview_url: req.body.preview_url,
           notes: req.body.notes,
           rating: req.body.rating,
-          downloads: parseInt(req.body.downloads, 10),
+          downloads: downloadCount,
           dateUpdated: new Date()
         };
 
@@ -276,13 +279,33 @@ async function startServer() {
       }
     });
 
+    // SPA fallback
     app.get('*', (req, res) => {
       res.sendFile(path.join(__dirname, 'public/index.html'));
     });
 
-    app.listen(port, () => {
+    const server = app.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`);
     });
+
+    // Internal keep-alive (no external DNS/CDN; uses Node's global fetch)
+    const keepAliveUrl = `http://127.0.0.1:${port}/health`;
+    const keepAlive = async () => {
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 5000);
+      try {
+        const r = await fetch(keepAliveUrl, { method: 'GET', signal: ctrl.signal });
+        if (!(r.status === 204 || r.ok)) {
+          console.warn(`[keepalive] non-OK ${r.status}`);
+        }
+      } catch (err) {
+        console.error('[keepalive] failed:', err?.message || err);
+      } finally {
+        clearTimeout(timeout);
+      }
+    };
+    setTimeout(keepAlive, 5000).unref();
+    setInterval(keepAlive, 14 * 60 * 1000).unref(); // every 14 minutes
 
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err);
@@ -291,8 +314,3 @@ async function startServer() {
 }
 
 startServer();
-setInterval(() => {
-  fetch('https://dingorb.com/')
-    .then(res => console.log(`Keep-alive ping: ${res.status}`))
-    .catch(err => console.error('Keep-alive ping failed:', err));
-}, 1000 * 60 * 14); // every 14 minutes
