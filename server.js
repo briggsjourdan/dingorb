@@ -46,12 +46,26 @@ const isInstrumentEnabled = (text, instrument) => {
 };
 
 const parseRbproj = (text) => {
-  const getString = (key) => {
-    const regex = new RegExp(`\\(\\s*['"]${key}['"]\\s*\\n?\\s*["']([^"']+)["']\\s*\\)`, 'i');
-    const match = text.match(regex);
-    if (!match) console.warn(`Couldn't find: ${key}`);
-    return match ? match[1] : null;
-  };
+const getString = (key) => {
+  const rx = new RegExp(
+    `\\(\\s*['"]${key}['"]\\s*\\n?\\s*(['"])` +
+    `((?:\\\\.|(?!\\1)[\\s\\S])*)` +
+    `\\1\\s*\\)`,
+    'i'
+  );
+  const m = text.match(rx);
+  if (!m) {
+    console.warn(`Couldn't find: ${key}`);
+    return null;
+  }
+  const raw = m[2];
+  return raw
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t')
+    .replace(/\\(["'\\])/g, '$1')
+    .trim();
+};
 
   const getNumber = (key) => {
     const regex = new RegExp(`\\(\\s*['"]${key}['"]\\s+(\\d+)\\s*\\)`, 'i');
@@ -83,7 +97,7 @@ const parseRbproj = (text) => {
     rank_drum: drumsEnabled ? getNumber('rank_drum') : 0,
     rank_vocals: vocalsEnabled ? getNumber('rank_vocals') : 0,
     rank_keys: keysEnabled ? getNumber('rank_keys') : 0,
-    rank_pro_keys: getNumber('rank_pro_keys'),
+    rank_pro_keys: keysEnabled ? getNumber('rank_pro_keys') : 0,
     vocal_parts: vocalsEnabled ? getNumber('vocal_parts') : 0
   };
 };
